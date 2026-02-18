@@ -231,8 +231,8 @@ export default function IDE() {
     const languagesRef = useRef({});
     const initializedRef = useRef(false);
     const sessionIdRef = useRef(null);
-    const filesRef = useRef([]);       // multi-file list
-    const activeFileRef = useRef(0);   // index of active file
+    const filesRef = useRef([]);       // tree: { type, name, content?, languageId?, flavor?, languageName?, children?, expanded? }
+    const activeFileRef = useRef(null); // direct reference to the active file node
     const { isSignedIn } = useAuth();
     const isSignedInRef = useRef(false);
     useEffect(() => { isSignedInRef.current = !!isSignedIn; }, [isSignedIn]);
@@ -528,41 +528,55 @@ export default function IDE() {
             });
         }
 
-        // ---- Multi-file helpers ----
+        // ---- Multi-file / folder helpers ----
         function renderFileList() {
             const list = document.getElementById("judge0-file-list");
             if (!list) return;
             list.innerHTML = "";
-            filesRef.current.forEach((file, i) => {
-                const item = document.createElement("div");
-                item.className = "judge0-file-item" + (i === activeFileRef.current ? " active" : "");
-                item.innerHTML = `<i class="file code outline icon"></i><span>${file.name}</span>`;
-                item.addEventListener("click", () => switchToFile(i));
-                list.appendChild(item);
-            });
+            function renderNodes(nodes, depth) {
+                nodes.forEach(node => {
+                    const item = document.createElement("div");
+                    item.className = "judge0-file-item" + (node === activeFileRef.current ? " active" : "");
+                    item.style.paddingLeft = `${12 + depth * 14}px`;
+                    if (node.type === "folder") {
+                        item.innerHTML = `<i class="caret ${node.expanded ? "down" : "right"} icon" style="font-size:10px;width:10px;opacity:0.55;flex-shrink:0"></i><i class="${node.expanded ? "folder open" : "folder"} outline icon" style="flex-shrink:0"></i><span>${node.name}</span>`;
+                        item.addEventListener("click", () => {
+                            node.expanded = !node.expanded;
+                            renderFileList();
+                        });
+                    } else {
+                        item.innerHTML = `<i class="file code outline icon" style="width:14px;flex-shrink:0"></i><span>${node.name}</span>`;
+                        item.addEventListener("click", () => switchToFile(node));
+                    }
+                    list.appendChild(item);
+                    if (node.type === "folder" && node.expanded && node.children?.length) {
+                        renderNodes(node.children, depth + 1);
+                    }
+                });
+            }
+            renderNodes(filesRef.current, 0);
         }
 
         function saveCurrentFileState() {
-            const idx = activeFileRef.current;
-            if (!filesRef.current[idx]) return;
+            const file = activeFileRef.current;
+            if (!file || file.type !== "file") return;
             const opt = window.$("#select-language").find(":selected");
-            filesRef.current[idx].content = sourceEditorRef.current.getValue();
-            filesRef.current[idx].languageId = parseInt(opt.val());
-            filesRef.current[idx].flavor = opt.attr("flavor");
-            filesRef.current[idx].languageName = opt.text();
+            file.content = sourceEditorRef.current.getValue();
+            file.languageId = parseInt(opt.val());
+            file.flavor = opt.attr("flavor");
+            file.languageName = opt.text();
         }
 
-        function switchToFile(idx) {
+        function switchToFile(fileNode) {
             saveCurrentFileState();
-            activeFileRef.current = idx;
-            const file = filesRef.current[idx];
-            sourceEditorRef.current.setValue(file.content || "");
-            if (file.languageId && file.flavor) {
-                selectLanguageByFlavorAndId(file.languageId, file.flavor);
+            activeFileRef.current = fileNode;
+            sourceEditorRef.current.setValue(fileNode.content || "");
+            if (fileNode.languageId && fileNode.flavor) {
+                selectLanguageByFlavorAndId(fileNode.languageId, fileNode.flavor);
             }
             renderFileList();
         }
-        // ----------------------------
+        // --------------------------------------
 
         async function loadSelectedLanguage(skipSetDefaultSourceCodeName = false) {
             window.monaco.editor.setModelLanguage(
@@ -820,14 +834,16 @@ export default function IDE() {
 
                     // Init file list with the first file
                     const opt = window.$("#select-language").find(":selected");
-                    filesRef.current = [{
+                    const firstFile = {
+                        type: "file",
                         name: getSourceCodeName() || "main.cpp",
                         content: sourceEditorRef.current.getValue(),
                         languageId: parseInt(opt.val()),
                         flavor: opt.attr("flavor"),
                         languageName: opt.text(),
-                    }];
-                    activeFileRef.current = 0;
+                    };
+                    filesRef.current = [firstFile];
+                    activeFileRef.current = firstFile;
                     renderFileList();
 
                     // Auto-save session content on changes
@@ -1086,22 +1102,35 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
             setTimeout(refreshLayoutSize, 160);
         });
 
-        // New file button — adds to file list
+        // New file button — adds to file list (or into active folder)
         document.getElementById("judge0-new-file-btn").addEventListener("click", function () {
             const name = prompt("File name:", "untitled.txt");
             if (!name) return;
             saveCurrentFileState();
-            filesRef.current.push({ name, content: "", languageId: null, flavor: null, languageName: null });
-            activeFileRef.current = filesRef.current.length - 1;
+            const newFile = { type: "file", name, content: "", languageId: null, flavor: null, languageName: null };
+            // Add inside active folder if one is selected, otherwise root
+            const active = activeFileRef.current;
+            const activeFolder = active?.type === "folder" ? active : null;
+            if (activeFolder) {
+                activeFolder.children.push(newFile);
+                activeFolder.expanded = true;
+            } else {
+                filesRef.current.push(newFile);
+            }
             sourceEditorRef.current.setValue("");
             const ext = name.split(".").pop();
             if (getLanguageForExtension(ext)) selectLanguageForExtension(ext);
+            activeFileRef.current = newFile;
             renderFileList();
         });
 
-        // New folder button (placeholder — single-file editor)
+        // New folder button — creates a folder at root
         document.getElementById("judge0-new-folder-btn").addEventListener("click", function () {
-            alert("Folders are not supported in the single-file editor.");
+            const name = prompt("Folder name:", "src");
+            if (!name) return;
+            const newFolder = { type: "folder", name, expanded: true, children: [] };
+            filesRef.current.push(newFolder);
+            renderFileList();
         });
 
         // Sync sidebar background with theme changes
