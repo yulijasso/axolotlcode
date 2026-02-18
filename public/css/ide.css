@@ -18,7 +18,73 @@
     overflow-y: auto;
 }
 
-#judge0-chat-messages pre {
+/* ========= Chat Code Blocks ========= */
+.judge0-code-block {
+    background: #0d0d0f;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    margin: 0.6em 0;
+    overflow: hidden;
+    font-size: 12px;
+}
+
+.judge0-code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.judge0-code-lang {
+    font-size: 10px;
+    opacity: 0.4;
+    font-family: inherit;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
+}
+
+.judge0-copy-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.4;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: opacity 0.12s;
+    letter-spacing: 0.3px;
+}
+
+.judge0-copy-btn:hover { opacity: 0.85; }
+
+.judge0-code-block pre {
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    background: transparent !important;
+    overflow-x: auto;
+}
+
+.judge0-code-block code {
+    background: transparent !important;
+    font-size: 12px;
+    font-family: "Menlo", "Monaco", "Consolas", monospace;
+}
+
+body.ide-light .judge0-code-block {
+    background: #f3f4f6;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.ide-light .judge0-code-block-header {
+    background: rgba(0, 0, 0, 0.04);
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Bare pre tags outside code blocks (fallback) */
+#judge0-chat-messages pre:not(.judge0-code-block pre) {
     overflow-x: auto;
 }
 

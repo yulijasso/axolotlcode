@@ -1190,6 +1190,41 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
 
                 aiMessage.innerHTML = window.DOMPurify.sanitize(aiResponseValue);
                 aiMessage.innerHTML = window.marked.parse(aiMessage.innerHTML);
+
+                // Wrap code blocks in terminal-style container with copy button
+                aiMessage.querySelectorAll("pre").forEach(pre => {
+                    const code = pre.querySelector("code");
+                    if (!code) return;
+                    const langClass = [...code.classList].find(c => c.startsWith("language-"));
+                    const lang = langClass ? langClass.replace("language-", "") : "";
+
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "judge0-code-block";
+
+                    const header = document.createElement("div");
+                    header.className = "judge0-code-block-header";
+
+                    const langLabel = document.createElement("span");
+                    langLabel.className = "judge0-code-lang";
+                    langLabel.textContent = lang;
+
+                    const copyBtn = document.createElement("button");
+                    copyBtn.className = "judge0-copy-btn";
+                    copyBtn.textContent = "Copy";
+                    copyBtn.addEventListener("click", () => {
+                        navigator.clipboard.writeText(code.innerText).then(() => {
+                            copyBtn.textContent = "Copied";
+                            setTimeout(() => { copyBtn.textContent = "Copy"; }, 1500);
+                        });
+                    });
+
+                    header.appendChild(langLabel);
+                    header.appendChild(copyBtn);
+                    pre.parentNode.insertBefore(wrapper, pre);
+                    wrapper.appendChild(header);
+                    wrapper.appendChild(pre);
+                });
+
                 aiMessage.classList.remove("loading");
                 messages.scrollTop = messages.scrollHeight;
 
