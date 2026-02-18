@@ -61,12 +61,16 @@
     z-index: 400;
     border-bottom: 1px solid rgba(128, 128, 128, 0.18);
     background: #1b1c1d;
+    color: rgba(255, 255, 255, 0.85);
     scrollbar-width: none;
 }
 
 #judge0-tab-bar::-webkit-scrollbar { display: none; }
 
-#judge0-tab-bar.light-theme { background: #e0e1e2; }
+#judge0-tab-bar.light-theme {
+    background: #e0e1e2;
+    color: rgba(0, 0, 0, 0.75);
+}
 
 .judge0-tab {
     display: flex;
@@ -111,10 +115,12 @@
     display: flex;
     z-index: 500;
     background: #1b1c1d;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 #judge0-sidebar.light-theme {
     background: #e0e1e2;
+    color: rgba(0, 0, 0, 0.75);
 }
 
 /* Activity bar (icon strip, always visible) */
