@@ -1264,11 +1264,23 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
             // Accept/Discard overlay widget
             const widgetNode = document.createElement("div");
             widgetNode.id = "judge0-diff-toolbar";
-            widgetNode.innerHTML = `
-                <span style="opacity:0.6;font-size:11px;margin-right:8px">AI suggested changes</span>
-                <button id="diff-accept-btn" class="ui mini button" style="background:rgba(80,200,100,0.25);color:inherit;border:1px solid rgba(80,200,100,0.5);margin-right:4px">✓ Accept</button>
-                <button id="diff-discard-btn" class="ui mini button" style="background:rgba(255,80,80,0.2);color:inherit;border:1px solid rgba(255,80,80,0.4)">✕ Discard</button>
-            `;
+            if (theme.isLight()) widgetNode.classList.add("light-theme");
+
+            const label = document.createElement("span");
+            label.className = "diff-toolbar-label";
+            label.textContent = "AI changes";
+
+            const acceptBtn = document.createElement("button");
+            acceptBtn.className = "diff-accept-btn";
+            acceptBtn.textContent = "✓ Accept";
+
+            const discardBtn = document.createElement("button");
+            discardBtn.className = "diff-discard-btn";
+            discardBtn.textContent = "✕ Discard";
+
+            widgetNode.appendChild(label);
+            widgetNode.appendChild(acceptBtn);
+            widgetNode.appendChild(discardBtn);
 
             diffOverlayWidget = {
                 getId: () => "judge0.diff.toolbar",
@@ -1276,14 +1288,13 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
                 getPosition: () => null,
             };
             editor.addOverlayWidget(diffOverlayWidget);
-            Object.assign(widgetNode.style, { top: "8px", right: "16px", position: "absolute", zIndex: "100", display: "flex", alignItems: "center", background: "rgba(30,30,40,0.92)", padding: "5px 10px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.25)", backdropFilter: "blur(6px)", userSelect: "none" });
 
-            document.getElementById("diff-accept-btn").addEventListener("click", () => {
+            acceptBtn.addEventListener("click", () => {
                 clearInlineDiff();
                 editor.setValue(newCode);
                 editor.updateOptions({ readOnly: false });
             });
-            document.getElementById("diff-discard-btn").addEventListener("click", () => {
+            discardBtn.addEventListener("click", () => {
                 clearInlineDiff();
                 editor.setValue(originalCode);
                 editor.updateOptions({ readOnly: false });
