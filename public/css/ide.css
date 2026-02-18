@@ -49,6 +49,60 @@
     }
 }
 
+/* ========= Tab Bar ========= */
+#judge0-tab-bar {
+    position: fixed;
+    right: 0;
+    height: 32px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    z-index: 400;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.18);
+    background: #1b1c1d;
+    scrollbar-width: none;
+}
+
+#judge0-tab-bar::-webkit-scrollbar { display: none; }
+
+#judge0-tab-bar.light-theme { background: #e0e1e2; }
+
+.judge0-tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 10px 0 12px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+    border-right: 1px solid rgba(128, 128, 128, 0.15);
+    opacity: 0.55;
+    user-select: none;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.judge0-tab:hover { opacity: 0.85; background: rgba(128, 128, 128, 0.08); }
+
+.judge0-tab.active {
+    opacity: 1;
+    background: rgba(128, 128, 128, 0.12);
+    border-bottom: 2px solid rgba(100, 160, 255, 0.75);
+}
+
+.judge0-tab-close {
+    opacity: 0;
+    font-size: 15px;
+    line-height: 1;
+    border-radius: 3px;
+    padding: 1px 3px;
+    transition: opacity 0.1s, background 0.1s;
+}
+
+.judge0-tab:hover .judge0-tab-close { opacity: 0.5; }
+.judge0-tab-close:hover { opacity: 1 !important; background: rgba(128, 128, 128, 0.25); }
+
 /* ========= Left Sidebar ========= */
 #judge0-sidebar {
     position: fixed;

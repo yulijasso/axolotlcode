@@ -528,9 +528,57 @@ export default function IDE() {
             });
         }
 
-        // ---- Multi-file / folder helpers ----
+        // ---- Multi-file / folder / tab helpers ----
         let draggedNode = null;
         let listDragReady = false;
+        let openTabs = [];
+
+        function renderTabBar() {
+            const bar = document.getElementById("judge0-tab-bar");
+            if (!bar) return;
+            bar.innerHTML = "";
+            openTabs.forEach(fileNode => {
+                const tab = document.createElement("div");
+                tab.className = "judge0-tab" + (fileNode === activeFileRef.current ? " active" : "");
+
+                const name = document.createElement("span");
+                name.textContent = fileNode.name;
+
+                const close = document.createElement("span");
+                close.className = "judge0-tab-close";
+                close.textContent = "×";
+                close.addEventListener("click", (e) => { e.stopPropagation(); closeTab(fileNode); });
+
+                tab.appendChild(name);
+                tab.appendChild(close);
+                tab.addEventListener("click", () => switchToFile(fileNode));
+                bar.appendChild(tab);
+            });
+        }
+
+        function openTab(fileNode) {
+            if (!openTabs.includes(fileNode)) openTabs.push(fileNode);
+            switchToFile(fileNode);
+        }
+
+        function closeTab(fileNode) {
+            const idx = openTabs.indexOf(fileNode);
+            if (idx === -1) return;
+            openTabs.splice(idx, 1);
+            if (activeFileRef.current === fileNode) {
+                const next = openTabs[Math.min(idx, openTabs.length - 1)];
+                if (next) {
+                    switchToFile(next);
+                } else {
+                    activeFileRef.current = null;
+                    sourceEditorRef.current.setValue("");
+                    renderFileList();
+                    renderTabBar();
+                }
+            } else {
+                renderTabBar();
+            }
+        }
 
         function isDescendantOf(target, ancestor) {
             if (ancestor.type !== "folder") return false;
@@ -603,6 +651,7 @@ export default function IDE() {
                     } else {
                         item.innerHTML = `<i class="file code outline icon" style="width:14px;flex-shrink:0"></i><span>${node.name}</span>`;
                         item.addEventListener("click", () => switchToFile(node));
+                        item.addEventListener("dblclick", () => openTab(node));
                     }
 
                     item.addEventListener("dragstart", (e) => {
@@ -643,6 +692,7 @@ export default function IDE() {
                 selectLanguageByFlavorAndId(fileNode.languageId, fileNode.flavor);
             }
             renderFileList();
+            renderTabBar();
         }
         // --------------------------------------
 
@@ -715,12 +765,16 @@ export default function IDE() {
             const nav = document.getElementById("judge0-site-navigation");
             const siteContent = document.getElementById("judge0-site-content");
             const sidebar = document.getElementById("judge0-sidebar");
+            const tabBar = document.getElementById("judge0-tab-bar");
             const sidebarW = sidebar ? sidebar.offsetWidth : 0;
+            const navH = nav.offsetHeight;
+            const tabH = tabBar ? tabBar.offsetHeight : 0;
             siteContent.style.height = `${window.innerHeight}px`;
-            siteContent.style.paddingTop = `${nav.offsetHeight}px`;
+            siteContent.style.paddingTop = `${navH + tabH}px`;
             siteContent.style.marginLeft = `${sidebarW}px`;
             siteContent.style.width = `${window.innerWidth - sidebarW}px`;
-            if (sidebar) sidebar.style.top = `${nav.offsetHeight}px`;
+            if (sidebar) sidebar.style.top = `${navH}px`;
+            if (tabBar) { tabBar.style.top = `${navH}px`; tabBar.style.left = `${sidebarW}px`; }
         }
 
         function refreshLayoutSize() {
@@ -912,7 +966,9 @@ export default function IDE() {
                     };
                     filesRef.current = [firstFile];
                     activeFileRef.current = firstFile;
+                    openTabs = [firstFile];
                     renderFileList();
+                    renderTabBar();
 
                     // Auto-save session content on changes
                     let saveTimer = null;
@@ -1201,10 +1257,13 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
             renderFileList();
         });
 
-        // Sync sidebar background with theme changes
+        // Sync sidebar + tab bar background with theme changes
         const sidebarThemeObserver = new MutationObserver(() => {
+            const isLight = theme.isLight();
             const sidebar = document.getElementById("judge0-sidebar");
-            if (sidebar) sidebar.classList.toggle("light-theme", theme.isLight());
+            const tabBar = document.getElementById("judge0-tab-bar");
+            if (sidebar) sidebar.classList.toggle("light-theme", isLight);
+            if (tabBar) tabBar.classList.toggle("light-theme", isLight);
         });
         sidebarThemeObserver.observe(document.body, { attributes: true, attributeFilter: ["style"] });
 
@@ -1287,6 +1346,9 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
                     </div>
                 </div>
             </div>
+
+            {/* Tab bar */}
+            <div id="judge0-tab-bar"></div>
 
             {/* Left sidebar */}
             <div id="judge0-sidebar" className="open">
