@@ -248,7 +248,8 @@ export default function IDE() {
                     typeof window.GoldenLayout !== "undefined" &&
                     typeof window.monaco !== "undefined" &&
                     typeof window.marked !== "undefined" &&
-                    typeof window.DOMPurify !== "undefined"
+                    typeof window.DOMPurify !== "undefined" &&
+                    typeof window.hljs !== "undefined"
                 ) {
                     resolve();
                 } else {
@@ -1223,6 +1224,8 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
                     pre.parentNode.insertBefore(wrapper, pre);
                     wrapper.appendChild(header);
                     wrapper.appendChild(pre);
+
+                    window.hljs.highlightElement(code);
                 });
 
                 aiMessage.classList.remove("loading");

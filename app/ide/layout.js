@@ -18,6 +18,7 @@ export default function IDELayout({ children }) {
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/golden-layout/1.5.9/css/goldenlayout-base.css" crossOrigin="anonymous" />
             <link id="judge0-golden-layout-light-theme-stylesheet" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/golden-layout/1.5.9/css/goldenlayout-light-theme.css" crossOrigin="anonymous" />
             <link id="judge0-golden-layout-dark-theme-stylesheet" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/golden-layout/1.5.9/css/goldenlayout-dark-theme.css" crossOrigin="anonymous" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css" crossOrigin="anonymous" />
             <link rel="stylesheet" href="/css/ide.css" />
             <link rel="stylesheet" href="/css/semantic.css" />
             <link rel="stylesheet" href="/css/site.css" />
@@ -62,6 +63,12 @@ export default function IDELayout({ children }) {
             <Script
                 src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"
                 integrity="sha512-LQNxIMR5rXv7o+b1l8+N1EZMfhG7iFZ9HhnbJkTp4zjNr5Wvst75AqUeFDxeRUa7l5vEDyUiAip//r+EFLLCyA=="
+                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
+                strategy="afterInteractive"
+            />
+            <Script
+                src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"
                 crossOrigin="anonymous"
                 referrerPolicy="no-referrer"
                 strategy="afterInteractive"
