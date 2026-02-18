@@ -1,0 +1,249 @@
+/* ─── Page ───────────────────────────────────────── */
+.page {
+    font-family: "JetBrains Mono", "Courier New", monospace;
+    background: #0d0d0d;
+    color: #c8c8c8;
+    min-height: 100vh;
+}
+
+.page::before {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px,
+        rgba(0, 0, 0, 0.08) 4px
+    );
+    z-index: 999;
+}
+
+/* ─── Nav ────────────────────────────────────────── */
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 3rem;
+    border-bottom: 1px solid #1e1e1e;
+}
+
+.navBrand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+}
+
+.navLogo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    filter: invert(1);
+}
+
+.navTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: #ff79c6;
+    text-transform: uppercase;
+}
+
+.navRight {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.navLink {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #444;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.navLink:hover {
+    color: #888;
+}
+
+/* ─── Container ──────────────────────────────────── */
+.container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+/* ─── Header ─────────────────────────────────────── */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+}
+
+.headerTitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.headerTitle span {
+    color: #555;
+}
+
+.newBtn {
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64ffda;
+    background: transparent;
+    border: 1px solid #64ffda;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.newBtn:hover {
+    background: #64ffda;
+    color: #0d0d0d;
+}
+
+/* ─── Session List ───────────────────────────────── */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+}
+
+.item:hover {
+    border-color: #2a2a2a;
+    background: #111;
+}
+
+.badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    min-width: 36px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.itemMain {
+    flex: 1;
+    min-width: 0;
+}
+
+.itemName {
+    font-size: 0.8rem;
+    color: #d0d0d0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.itemName input {
+    font-family: inherit;
+    font-size: 0.8rem;
+    color: #d0d0d0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ff79c6;
+    outline: none;
+    width: 100%;
+    padding: 0;
+}
+
+.itemMeta {
+    font-size: 0.65rem;
+    color: #333;
+    margin-top: 0.2rem;
+    letter-spacing: 0.05em;
+}
+
+.itemTime {
+    font-size: 0.65rem;
+    color: #2a2a2a;
+    flex-shrink: 0;
+    letter-spacing: 0.05em;
+}
+
+.deleteBtn {
+    font-family: inherit;
+    font-size: 0.65rem;
+    color: #333;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    transition: color 0.15s;
+    opacity: 0;
+    flex-shrink: 0;
+}
+
+.item:hover .deleteBtn {
+    opacity: 1;
+}
+
+.deleteBtn:hover {
+    color: #ff5555;
+}
+
+/* ─── Empty state ────────────────────────────────── */
+.empty {
+    text-align: center;
+    padding: 5rem 2rem;
+    border: 1px solid #1a1a1a;
+}
+
+.emptyPrompt {
+    font-size: 0.65rem;
+    color: #2a2a2a;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+}
+
+.emptyPrompt span {
+    color: #64ffda;
+}
+
+.emptyBtn {
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64ffda;
+    background: transparent;
+    border: 1px solid #64ffda;
+    padding: 0.5rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.emptyBtn:hover {
+    background: #64ffda;
+    color: #0d0d0d;
+}

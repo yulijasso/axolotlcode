@@ -1,0 +1,172 @@
+/* ─── Panel ──────────────────────────────────────── */
+.panel {
+    width: 100%;
+    max-width: 440px;
+    border: 1px solid #1e1e1e;
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    font-family: "JetBrains Mono", monospace;
+}
+
+/* ─── Title bar ──────────────────────────────────── */
+.titleBar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.9rem;
+    background: #111;
+    border-bottom: 1px solid #1e1e1e;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    flex-shrink: 0;
+}
+
+.barTitle {
+    font-size: 0.62rem;
+    color: #333;
+    letter-spacing: 0.1em;
+    margin-left: 0.4rem;
+}
+
+/* ─── Search ─────────────────────────────────────── */
+.searchRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.searchIcon {
+    font-size: 0.7rem;
+    color: #ff79c6;
+    flex-shrink: 0;
+}
+
+.searchInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.72rem;
+    color: #c8c8c8;
+    letter-spacing: 0.06em;
+}
+
+.searchInput::placeholder {
+    color: #2e2e2e;
+}
+
+/* ─── Lists ──────────────────────────────────────── */
+.listsWrap {
+    max-height: 260px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #1e1e1e transparent;
+}
+
+.listsWrap::-webkit-scrollbar { width: 4px; }
+.listsWrap::-webkit-scrollbar-track { background: transparent; }
+.listsWrap::-webkit-scrollbar-thumb { background: #1e1e1e; }
+
+.section {
+    padding: 0.5rem 0;
+}
+
+.sectionLabel {
+    font-size: 0.58rem;
+    color: #2a2a2a;
+    letter-spacing: 0.18em;
+    padding: 0.3rem 0.9rem 0.4rem;
+    margin: 0;
+}
+
+/* ─── Language row ───────────────────────────────── */
+.langRow {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.45rem 0.9rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s;
+    font-family: inherit;
+}
+
+.langRow:hover {
+    background: #111;
+}
+
+.langRow.active {
+    background: #0f0f0f;
+}
+
+.langIcon {
+    font-size: 0.8rem;
+    width: 1.2rem;
+    text-align: center;
+    color: #444;
+    flex-shrink: 0;
+}
+
+.langName {
+    font-size: 0.72rem;
+    color: #888;
+    letter-spacing: 0.04em;
+    flex: 1;
+}
+
+.langRow.active .langName {
+    color: #c8c8c8;
+}
+
+.check {
+    font-size: 0.45rem;
+    color: #ff79c6;
+    flex-shrink: 0;
+}
+
+.empty {
+    font-size: 0.65rem;
+    color: #2a2a2a;
+    padding: 0.5rem 0.9rem;
+    margin: 0;
+    letter-spacing: 0.06em;
+}
+
+/* ─── CTA ────────────────────────────────────────── */
+.ctaRow {
+    padding: 0.75rem 0.9rem;
+    border-top: 1px solid #1a1a1a;
+    background: #0a0a0a;
+}
+
+.ctaBtn {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #0d0d0d;
+    background: #ff79c6;
+    border: none;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.ctaBtn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
