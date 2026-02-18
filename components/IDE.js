@@ -1264,7 +1264,7 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
             // Accept/Discard overlay widget
             const widgetNode = document.createElement("div");
             widgetNode.id = "judge0-diff-toolbar";
-            if (theme.isLight()) widgetNode.classList.add("light-theme");
+            widgetNode.classList.toggle("light-theme", theme.isLight());
 
             const label = document.createElement("span");
             label.className = "diff-toolbar-label";
@@ -1353,13 +1353,16 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
             renderFileList();
         });
 
-        // Sync sidebar + tab bar background with theme changes
+        // Sync theme across sidebar, tab bar, diff toolbar, and body class
         const sidebarThemeObserver = new MutationObserver(() => {
             const isLight = theme.isLight();
+            document.body.classList.toggle("ide-light", isLight);
             const sidebar = document.getElementById("judge0-sidebar");
             const tabBar = document.getElementById("judge0-tab-bar");
+            const diffToolbar = document.getElementById("judge0-diff-toolbar");
             if (sidebar) sidebar.classList.toggle("light-theme", isLight);
             if (tabBar) tabBar.classList.toggle("light-theme", isLight);
+            if (diffToolbar) diffToolbar.classList.toggle("light-theme", isLight);
         });
         sidebarThemeObserver.observe(document.body, { attributes: true, attributeFilter: ["style"] });
 

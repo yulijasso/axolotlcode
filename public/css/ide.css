@@ -240,14 +240,14 @@
     opacity: 1;
 }
 
-/* ========= Inline diff decorations ========= */
+/* ========= Inline diff decorations — dark (default) ========= */
 .diff-delete-line {
-    background: rgba(255, 80, 80, 0.07) !important;
+    background: rgba(255, 80, 80, 0.08) !important;
     border-left: 2px solid rgba(255, 100, 100, 0.45);
 }
 
 .diff-insert-line {
-    background: rgba(80, 200, 100, 0.07) !important;
+    background: rgba(80, 200, 100, 0.08) !important;
     border-left: 2px solid rgba(80, 200, 100, 0.45);
 }
 
@@ -263,7 +263,21 @@
     font-size: 12px;
 }
 
-/* Diff toolbar */
+/* Light theme overrides for decorations (body class set by MutationObserver) */
+body.ide-light .diff-delete-line {
+    background: rgba(210, 40, 40, 0.09) !important;
+    border-left-color: rgba(200, 50, 50, 0.55);
+}
+
+body.ide-light .diff-insert-line {
+    background: rgba(30, 150, 60, 0.09) !important;
+    border-left-color: rgba(30, 150, 60, 0.55);
+}
+
+body.ide-light .diff-delete-gutter::before { color: rgba(190, 40, 40, 0.7); }
+body.ide-light .diff-insert-gutter::before { color: rgba(30, 150, 60, 0.7); }
+
+/* ========= Diff toolbar ========= */
 #judge0-diff-toolbar {
     display: flex;
     align-items: center;
@@ -272,17 +286,20 @@
     right: 14px;
     position: absolute;
     z-index: 100;
-    background: rgba(22, 22, 28, 0.92);
-    border: 1px solid rgba(128, 128, 128, 0.2);
+    background: rgba(20, 20, 26, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     padding: 5px 10px;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
     font-size: 11px;
     user-select: none;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 #judge0-diff-toolbar.light-theme {
-    background: rgba(220, 221, 222, 0.95);
+    background: rgba(230, 231, 232, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.75);
 }
 
 .diff-toolbar-label {
@@ -291,10 +308,11 @@
     margin-right: 4px;
 }
 
+/* Accept button */
 .diff-accept-btn {
     background: transparent;
-    border: 1px solid rgba(80, 200, 100, 0.4);
-    color: rgba(80, 200, 100, 0.85);
+    border: 1px solid rgba(80, 200, 100, 0.45);
+    color: rgba(80, 210, 100, 0.9);
     border-radius: 4px;
     padding: 3px 9px;
     cursor: pointer;
@@ -302,16 +320,24 @@
     font-family: inherit;
     transition: background 0.12s, color 0.12s;
 }
-
 .diff-accept-btn:hover {
     background: rgba(80, 200, 100, 0.15);
-    color: rgba(80, 200, 100, 1);
+    color: rgba(80, 210, 100, 1);
+}
+#judge0-diff-toolbar.light-theme .diff-accept-btn {
+    border-color: rgba(30, 140, 55, 0.5);
+    color: rgba(25, 130, 50, 0.9);
+}
+#judge0-diff-toolbar.light-theme .diff-accept-btn:hover {
+    background: rgba(30, 140, 55, 0.12);
+    color: rgba(20, 120, 45, 1);
 }
 
+/* Discard button */
 .diff-discard-btn {
     background: transparent;
-    border: 1px solid rgba(255, 100, 100, 0.35);
-    color: rgba(255, 100, 100, 0.75);
+    border: 1px solid rgba(255, 100, 100, 0.4);
+    color: rgba(255, 110, 110, 0.85);
     border-radius: 4px;
     padding: 3px 9px;
     cursor: pointer;
@@ -319,10 +345,17 @@
     font-family: inherit;
     transition: background 0.12s, color 0.12s;
 }
-
 .diff-discard-btn:hover {
-    background: rgba(255, 100, 100, 0.12);
-    color: rgba(255, 100, 100, 1);
+    background: rgba(255, 100, 100, 0.13);
+    color: rgba(255, 110, 110, 1);
+}
+#judge0-diff-toolbar.light-theme .diff-discard-btn {
+    border-color: rgba(190, 40, 40, 0.45);
+    color: rgba(185, 35, 35, 0.85);
+}
+#judge0-diff-toolbar.light-theme .diff-discard-btn:hover {
+    background: rgba(190, 40, 40, 0.1);
+    color: rgba(180, 30, 30, 1);
 }
 
 /* Drag and drop */
