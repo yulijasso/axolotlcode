@@ -529,25 +529,93 @@ export default function IDE() {
         }
 
         // ---- Multi-file / folder helpers ----
+        let draggedNode = null;
+        let listDragReady = false;
+
+        function isDescendantOf(target, ancestor) {
+            if (ancestor.type !== "folder") return false;
+            return (ancestor.children || []).some(c => c === target || isDescendantOf(target, c));
+        }
+
+        function findAndRemoveNode(nodes, target) {
+            const idx = nodes.indexOf(target);
+            if (idx !== -1) { nodes.splice(idx, 1); return true; }
+            return nodes.some(n => n.type === "folder" && findAndRemoveNode(n.children || [], target));
+        }
+
         function renderFileList() {
             const list = document.getElementById("judge0-file-list");
             if (!list) return;
             list.innerHTML = "";
+
+            // Root-level drop zone (once per list element)
+            if (!listDragReady) {
+                listDragReady = true;
+                list.addEventListener("dragover", (e) => {
+                    if (!draggedNode || document.querySelector(".judge0-drop-target")) return;
+                    e.preventDefault();
+                    list.classList.add("judge0-list-drop-target");
+                });
+                list.addEventListener("dragleave", (e) => {
+                    if (!list.contains(e.relatedTarget)) list.classList.remove("judge0-list-drop-target");
+                });
+                list.addEventListener("drop", (e) => {
+                    list.classList.remove("judge0-list-drop-target");
+                    if (!draggedNode || document.querySelector(".judge0-drop-target")) return;
+                    e.preventDefault();
+                    findAndRemoveNode(filesRef.current, draggedNode);
+                    filesRef.current.push(draggedNode);
+                    draggedNode = null;
+                    renderFileList();
+                });
+            }
+
             function renderNodes(nodes, depth) {
                 nodes.forEach(node => {
                     const item = document.createElement("div");
                     item.className = "judge0-file-item" + (node === activeFileRef.current ? " active" : "");
                     item.style.paddingLeft = `${12 + depth * 14}px`;
+                    item.setAttribute("draggable", "true");
+
                     if (node.type === "folder") {
                         item.innerHTML = `<i class="caret ${node.expanded ? "down" : "right"} icon" style="font-size:10px;width:10px;opacity:0.55;flex-shrink:0"></i><i class="${node.expanded ? "folder open" : "folder"} outline icon" style="flex-shrink:0"></i><span>${node.name}</span>`;
-                        item.addEventListener("click", () => {
-                            node.expanded = !node.expanded;
+                        item.addEventListener("click", () => { node.expanded = !node.expanded; renderFileList(); });
+                        item.addEventListener("dragover", (e) => {
+                            if (!draggedNode || draggedNode === node || isDescendantOf(node, draggedNode)) return;
+                            e.preventDefault(); e.stopPropagation();
+                            document.querySelectorAll(".judge0-drop-target").forEach(el => el.classList.remove("judge0-drop-target"));
+                            item.classList.add("judge0-drop-target");
+                            list.classList.remove("judge0-list-drop-target");
+                        });
+                        item.addEventListener("dragleave", (e) => {
+                            if (!item.contains(e.relatedTarget)) item.classList.remove("judge0-drop-target");
+                        });
+                        item.addEventListener("drop", (e) => {
+                            e.preventDefault(); e.stopPropagation();
+                            item.classList.remove("judge0-drop-target");
+                            if (!draggedNode || draggedNode === node || isDescendantOf(node, draggedNode)) return;
+                            findAndRemoveNode(filesRef.current, draggedNode);
+                            (node.children = node.children || []).push(draggedNode);
+                            node.expanded = true;
+                            draggedNode = null;
                             renderFileList();
                         });
                     } else {
                         item.innerHTML = `<i class="file code outline icon" style="width:14px;flex-shrink:0"></i><span>${node.name}</span>`;
                         item.addEventListener("click", () => switchToFile(node));
                     }
+
+                    item.addEventListener("dragstart", (e) => {
+                        draggedNode = node;
+                        e.dataTransfer.effectAllowed = "move";
+                        setTimeout(() => item.classList.add("dragging"), 0);
+                    });
+                    item.addEventListener("dragend", () => {
+                        draggedNode = null;
+                        document.querySelectorAll(".dragging, .judge0-drop-target, .judge0-list-drop-target")
+                            .forEach(el => el.classList.remove("dragging", "judge0-drop-target", "judge0-list-drop-target"));
+                    });
+
                     list.appendChild(item);
                     if (node.type === "folder" && node.expanded && node.children?.length) {
                         renderNodes(node.children, depth + 1);
