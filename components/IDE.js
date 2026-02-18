@@ -231,6 +231,8 @@ export default function IDE() {
     const languagesRef = useRef({});
     const initializedRef = useRef(false);
     const sessionIdRef = useRef(null);
+    const filesRef = useRef([]);       // multi-file list
+    const activeFileRef = useRef(0);   // index of active file
     const { isSignedIn } = useAuth();
     const isSignedInRef = useRef(false);
     useEffect(() => { isSignedInRef.current = !!isSignedIn; }, [isSignedIn]);
@@ -526,6 +528,42 @@ export default function IDE() {
             });
         }
 
+        // ---- Multi-file helpers ----
+        function renderFileList() {
+            const list = document.getElementById("judge0-file-list");
+            if (!list) return;
+            list.innerHTML = "";
+            filesRef.current.forEach((file, i) => {
+                const item = document.createElement("div");
+                item.className = "judge0-file-item" + (i === activeFileRef.current ? " active" : "");
+                item.innerHTML = `<i class="file code outline icon"></i><span>${file.name}</span>`;
+                item.addEventListener("click", () => switchToFile(i));
+                list.appendChild(item);
+            });
+        }
+
+        function saveCurrentFileState() {
+            const idx = activeFileRef.current;
+            if (!filesRef.current[idx]) return;
+            const opt = window.$("#select-language").find(":selected");
+            filesRef.current[idx].content = sourceEditorRef.current.getValue();
+            filesRef.current[idx].languageId = parseInt(opt.val());
+            filesRef.current[idx].flavor = opt.attr("flavor");
+            filesRef.current[idx].languageName = opt.text();
+        }
+
+        function switchToFile(idx) {
+            saveCurrentFileState();
+            activeFileRef.current = idx;
+            const file = filesRef.current[idx];
+            sourceEditorRef.current.setValue(file.content || "");
+            if (file.languageId && file.flavor) {
+                selectLanguageByFlavorAndId(file.languageId, file.flavor);
+            }
+            renderFileList();
+        }
+        // ----------------------------
+
         async function loadSelectedLanguage(skipSetDefaultSourceCodeName = false) {
             window.monaco.editor.setModelLanguage(
                 sourceEditorRef.current.getModel(),
@@ -594,8 +632,13 @@ export default function IDE() {
         function refreshSiteContentHeight() {
             const nav = document.getElementById("judge0-site-navigation");
             const siteContent = document.getElementById("judge0-site-content");
+            const sidebar = document.getElementById("judge0-sidebar");
+            const sidebarW = sidebar ? sidebar.offsetWidth : 0;
             siteContent.style.height = `${window.innerHeight}px`;
             siteContent.style.paddingTop = `${nav.offsetHeight}px`;
+            siteContent.style.marginLeft = `${sidebarW}px`;
+            siteContent.style.width = `${window.innerWidth - sidebarW}px`;
+            if (sidebar) sidebar.style.top = `${nav.offsetHeight}px`;
         }
 
         function refreshLayoutSize() {
@@ -774,6 +817,18 @@ export default function IDE() {
                     await setDefaults();
                     refreshLayoutSize();
                     window.top.postMessage({ event: "initialised" }, "*");
+
+                    // Init file list with the first file
+                    const opt = window.$("#select-language").find(":selected");
+                    filesRef.current = [{
+                        name: getSourceCodeName() || "main.cpp",
+                        content: sourceEditorRef.current.getValue(),
+                        languageId: parseInt(opt.val()),
+                        flavor: opt.attr("flavor"),
+                        languageName: opt.text(),
+                    }];
+                    activeFileRef.current = 0;
+                    renderFileList();
 
                     // Auto-save session content on changes
                     let saveTimer = null;
@@ -1023,9 +1078,43 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
             });
         }
 
+        // Sidebar toggle
+        document.getElementById("judge0-files-btn").addEventListener("click", function () {
+            const sidebar = document.getElementById("judge0-sidebar");
+            const isOpen = sidebar.classList.toggle("open");
+            this.classList.toggle("active", isOpen);
+            setTimeout(refreshLayoutSize, 160);
+        });
+
+        // New file button — adds to file list
+        document.getElementById("judge0-new-file-btn").addEventListener("click", function () {
+            const name = prompt("File name:", "untitled.txt");
+            if (!name) return;
+            saveCurrentFileState();
+            filesRef.current.push({ name, content: "", languageId: null, flavor: null, languageName: null });
+            activeFileRef.current = filesRef.current.length - 1;
+            sourceEditorRef.current.setValue("");
+            const ext = name.split(".").pop();
+            if (getLanguageForExtension(ext)) selectLanguageForExtension(ext);
+            renderFileList();
+        });
+
+        // New folder button (placeholder — single-file editor)
+        document.getElementById("judge0-new-folder-btn").addEventListener("click", function () {
+            alert("Folders are not supported in the single-file editor.");
+        });
+
+        // Sync sidebar background with theme changes
+        const sidebarThemeObserver = new MutationObserver(() => {
+            const sidebar = document.getElementById("judge0-sidebar");
+            if (sidebar) sidebar.classList.toggle("light-theme", theme.isLight());
+        });
+        sidebarThemeObserver.observe(document.body, { attributes: true, attributeFilter: ["style"] });
+
         // Cleanup
         return () => {
             window.removeEventListener("resize", () => {});
+            sidebarThemeObserver.disconnect();
         };
     }, []);
 
@@ -1099,6 +1188,31 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
                             </SignInButton>
                         </SignedOut>
                     </div>
+                </div>
+            </div>
+
+            {/* Left sidebar */}
+            <div id="judge0-sidebar" className="open">
+                <div id="judge0-activity-bar">
+                    <div id="judge0-files-btn" className="judge0-activity-icon active" title="Files">
+                        <i className="folder icon"></i>
+                    </div>
+                </div>
+                <div id="judge0-file-panel">
+                    <div id="judge0-file-panel-header">
+                        <span>Files</span>
+                        <div className="judge0-panel-actions">
+                            <button id="judge0-new-file-btn" className="judge0-panel-action-btn" title="New File">
+                                <i className="file outline icon" style={{fontSize: "11px"}}></i>
+                                <i className="plus icon" style={{fontSize: "7px", marginLeft: "-4px", marginTop: "-6px"}}></i>
+                            </button>
+                            <button id="judge0-new-folder-btn" className="judge0-panel-action-btn" title="New Folder">
+                                <i className="folder outline icon" style={{fontSize: "11px"}}></i>
+                                <i className="plus icon" style={{fontSize: "7px", marginLeft: "-4px", marginTop: "-6px"}}></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="judge0-file-list"></div>
                 </div>
             </div>
 
