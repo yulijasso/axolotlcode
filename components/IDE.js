@@ -1196,16 +1196,7 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
                 const fixedCodeMatch = aiResponseValue.match(/```fixed\s([\s\S]*?)```/);
                 if (fixedCodeMatch) {
                     const fixedCode = fixedCodeMatch[1].trim();
-                    const applyFixButton = document.createElement("button");
-                    applyFixButton.innerText = "Apply Fix";
-                    applyFixButton.classList.add("ui", "button", "tiny", "green");
-
-                    applyFixButton.addEventListener("click", function () {
-                        sourceEditorRef.current.setValue(fixedCode);
-                        messages.removeChild(applyFixButton);
-                    });
-
-                    messages.appendChild(applyFixButton);
+                    showInlineDiff(fixedCode);
                 }
 
                 userInput.disabled = false;
@@ -1217,6 +1208,100 @@ ${lineNumber !== null ? `Focus on line: ${lineNumber + 1}\nSnippet: \n${codeSnip
                 document.getElementById("judge0-chat-user-input").placeholder = `Message ${this.value}`;
             });
         }
+
+        // ---- Inline diff (Cursor-style) ----
+        let diffDecorationIds = [];
+        let diffOverlayWidget = null;
+
+        function diffLines(original, modified) {
+            const a = original.split("\n"), b = modified.split("\n");
+            const m = a.length, n = b.length;
+            const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+            for (let i = 1; i <= m; i++)
+                for (let j = 1; j <= n; j++)
+                    dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+            const ops = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({ type: "equal", line: a[i-1] }); i--; j--; }
+                else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { ops.unshift({ type: "insert", line: b[j-1] }); j--; }
+                else { ops.unshift({ type: "delete", line: a[i-1] }); i--; }
+            }
+            return ops;
+        }
+
+        function showInlineDiff(newCode) {
+            const editor = sourceEditorRef.current;
+            const originalCode = editor.getValue();
+
+            // Clear any existing diff
+            clearInlineDiff();
+
+            const ops = diffLines(originalCode, newCode);
+            const mergedLines = ops.map(op => op.line);
+            const deleteLines = [], insertLines = [];
+            ops.forEach((op, i) => {
+                if (op.type === "delete") deleteLines.push(i + 1);
+                else if (op.type === "insert") insertLines.push(i + 1);
+            });
+
+            editor.setValue(mergedLines.join("\n"));
+            editor.updateOptions({ readOnly: true });
+
+            const monaco = window.monaco;
+            const newDecorations = [
+                ...deleteLines.map(ln => ({
+                    range: new monaco.Range(ln, 1, ln, 1),
+                    options: { isWholeLine: true, className: "diff-delete-line", linesDecorationsClassName: "diff-delete-gutter" }
+                })),
+                ...insertLines.map(ln => ({
+                    range: new monaco.Range(ln, 1, ln, 1),
+                    options: { isWholeLine: true, className: "diff-insert-line", linesDecorationsClassName: "diff-insert-gutter" }
+                })),
+            ];
+            diffDecorationIds = editor.deltaDecorations([], newDecorations);
+
+            // Accept/Discard overlay widget
+            const widgetNode = document.createElement("div");
+            widgetNode.id = "judge0-diff-toolbar";
+            widgetNode.innerHTML = `
+                <span style="opacity:0.6;font-size:11px;margin-right:8px">AI suggested changes</span>
+                <button id="diff-accept-btn" class="ui mini button" style="background:rgba(80,200,100,0.25);color:inherit;border:1px solid rgba(80,200,100,0.5);margin-right:4px">✓ Accept</button>
+                <button id="diff-discard-btn" class="ui mini button" style="background:rgba(255,80,80,0.2);color:inherit;border:1px solid rgba(255,80,80,0.4)">✕ Discard</button>
+            `;
+
+            diffOverlayWidget = {
+                getId: () => "judge0.diff.toolbar",
+                getDomNode: () => widgetNode,
+                getPosition: () => null,
+            };
+            editor.addOverlayWidget(diffOverlayWidget);
+            Object.assign(widgetNode.style, { top: "8px", right: "16px", position: "absolute", zIndex: "100", display: "flex", alignItems: "center", background: "rgba(30,30,40,0.92)", padding: "5px 10px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.25)", backdropFilter: "blur(6px)", userSelect: "none" });
+
+            document.getElementById("diff-accept-btn").addEventListener("click", () => {
+                clearInlineDiff();
+                editor.setValue(newCode);
+                editor.updateOptions({ readOnly: false });
+            });
+            document.getElementById("diff-discard-btn").addEventListener("click", () => {
+                clearInlineDiff();
+                editor.setValue(originalCode);
+                editor.updateOptions({ readOnly: false });
+            });
+        }
+
+        function clearInlineDiff() {
+            const editor = sourceEditorRef.current;
+            if (diffDecorationIds.length) {
+                editor.deltaDecorations(diffDecorationIds, []);
+                diffDecorationIds = [];
+            }
+            if (diffOverlayWidget) {
+                editor.removeOverlayWidget(diffOverlayWidget);
+                diffOverlayWidget = null;
+            }
+        }
+        // ------------------------------------
 
         // Sidebar toggle
         document.getElementById("judge0-files-btn").addEventListener("click", function () {

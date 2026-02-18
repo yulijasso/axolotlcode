@@ -240,6 +240,31 @@
     opacity: 1;
 }
 
+/* ========= Inline diff decorations ========= */
+.diff-delete-line {
+    background: rgba(255, 80, 80, 0.18) !important;
+    border-left: 3px solid rgba(255, 80, 80, 0.7);
+}
+
+.diff-insert-line {
+    background: rgba(80, 200, 100, 0.18) !important;
+    border-left: 3px solid rgba(80, 200, 100, 0.7);
+}
+
+.diff-delete-gutter::before {
+    content: "−";
+    color: rgba(255, 80, 80, 0.9);
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.diff-insert-gutter::before {
+    content: "+";
+    color: rgba(80, 200, 100, 0.9);
+    font-weight: bold;
+    font-size: 13px;
+}
+
 /* Drag and drop */
 .judge0-file-item[draggable="true"] {
     cursor: grab;
