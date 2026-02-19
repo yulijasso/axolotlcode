@@ -18,7 +18,59 @@
     overflow-y: auto;
 }
 
-/* ========= Chat Code Blocks ========= */
+/* ========= Chat Messages ========= */
+.judge0-message {
+    border-radius: 8px !important;
+    margin: 6px 10px !important;
+    padding: 10px 13px !important;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+/* User bubble — right-aligned */
+.judge0-user-message {
+    margin-left: auto !important;
+    margin-right: 10px !important;
+    max-width: 72%;
+    width: fit-content;
+    overflow-wrap: break-word;
+    /* dark mode */
+    background: #2a3a6e !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body.ide-light .judge0-user-message {
+    background: #dde5f8 !important;
+    color: #1a2050 !important;
+}
+
+/* AI message */
+.judge0-message:not(.judge0-user-message) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-left: 4px !important;
+    margin-left: 4px !important;
+}
+
+/* Inline code */
+.judge0-message code:not(.hljs) {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 11.5px;
+    font-family: "Menlo", "Monaco", "Consolas", monospace;
+    color: #e8b36a;
+}
+
+body.ide-light .judge0-message code:not(.hljs) {
+    background: rgba(0, 0, 0, 0.07);
+    color: #b5520d;
+}
+
+/* ========= Chat Code Blocks (always dark) ========= */
 .judge0-code-block {
     background: #0d0d0f;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -26,6 +78,12 @@
     margin: 0.6em 0;
     overflow: hidden;
     font-size: 12px;
+}
+
+/* In light mode, add a slightly stronger border so the dark block contrasts */
+body.ide-light .judge0-code-block {
+    border-color: rgba(0, 0, 0, 0.18);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .judge0-code-block-header {
@@ -43,12 +101,13 @@
     font-family: inherit;
     text-transform: lowercase;
     letter-spacing: 0.5px;
+    color: #fff;
 }
 
 .judge0-copy-btn {
     background: none;
     border: none;
-    color: inherit;
+    color: #fff;
     opacity: 0.4;
     font-size: 10px;
     cursor: pointer;
@@ -74,28 +133,9 @@
     font-family: "Menlo", "Monaco", "Consolas", monospace;
 }
 
-body.ide-light .judge0-code-block {
-    background: #f3f4f6;
-    border-color: rgba(0, 0, 0, 0.1);
-}
-
-body.ide-light .judge0-code-block-header {
-    background: rgba(0, 0, 0, 0.04);
-    border-bottom-color: rgba(0, 0, 0, 0.08);
-}
-
 /* Bare pre tags outside code blocks (fallback) */
 #judge0-chat-messages pre:not(.judge0-code-block pre) {
     overflow-x: auto;
-}
-
-.judge0-user-message {
-    margin-left: auto !important;
-    margin-right: 1em !important;
-    margin-top: 1em !important;
-    max-width: 66%;
-    overflow-wrap: break-word;
-    width: fit-content;
 }
 
 #judge0-chat-input-container {
